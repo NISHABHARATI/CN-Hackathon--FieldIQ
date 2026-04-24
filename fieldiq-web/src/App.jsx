@@ -173,7 +173,7 @@ function LoginScreen({ onLogin }) {
           <div className="hero-sub">{todayLabel()}</div>
         </div>
 
-        <form onSubmit={submit}>
+        <form onSubmit={submit} className="login-form-wrap">
           <div className="form-group">
             <label className="form-label">Mobile Number</label>
             <input
@@ -288,76 +288,51 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onLogout }) {
       )}
 
       {!loading && total > 0 && (
-        <>
-          <div className="content" style={{ paddingBottom: 0 }}>
-            <div className="progress-wrap">
-              <div className="progress-header">
-                <span className="progress-label">Today's progress</span>
-                <span className="progress-count">{done} / {total} visits</span>
-              </div>
-              <div className="progress-track">
-                <div className="progress-fill" style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-
-            <div className="stats-row">
-              <div className="stat-box">
-                <span className="stat-icon">📍</span>
-                <div>
-                  <div className="stat-val">{totalDist} <span style={{ fontSize: 12, fontWeight: 600 }}>km</span></div>
-                  <div className="stat-lbl">Total distance</div>
+        <div className="route-body">
+          {/* Left panel: stats + list */}
+          <div className="route-list-panel">
+            <div className="content" style={{ paddingBottom: 0 }}>
+              <div className="progress-wrap">
+                <div className="progress-header">
+                  <span className="progress-label">Today's progress</span>
+                  <span className="progress-count">{done} / {total} visits</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${pct}%` }} />
                 </div>
               </div>
-              <div className="stat-box">
-                <span className="stat-icon">✅</span>
-                <div>
-                  <div className="stat-val">{pct}<span style={{ fontSize: 12, fontWeight: 600 }}>%</span></div>
-                  <div className="stat-lbl">Completion</div>
+
+              <div className="stats-row">
+                <div className="stat-box">
+                  <span className="stat-icon">📍</span>
+                  <div>
+                    <div className="stat-val">{totalDist} <span style={{ fontSize: 12, fontWeight: 600 }}>km</span></div>
+                    <div className="stat-lbl">Total distance</div>
+                  </div>
+                </div>
+                <div className="stat-box">
+                  <span className="stat-icon">✅</span>
+                  <div>
+                    <div className="stat-val">{pct}<span style={{ fontSize: 12, fontWeight: 600 }}>%</span></div>
+                    <div className="stat-lbl">Completion</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="toggle-tabs">
-              {['list', 'map'].map(t => (
-                <button key={t} className={`toggle-tab${view === t ? ' active' : ''}`} onClick={() => setView(t)}>
-                  {t === 'map' ? '🗺 Map' : '☰ List'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {view === 'map' && (
-            <div style={{ position: 'relative', flex: 1 }}>
-              <div className="map-wrap">
-                <MapContainer center={homePos} zoom={13} style={{ height: '100%', width: '100%' }}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='© OpenStreetMap' />
-                  <FitBounds points={routeLine} />
-                  <Polyline positions={routeLine} color="#4f46e5" weight={3} opacity={0.65} dashArray="6,5" />
-                  <Marker position={homePos} icon={homeIcon}>
-                    <Popup><b>{agent.name}</b><br />Starting point</Popup>
-                  </Marker>
-                  {visits.map(v => v.latitude && v.longitude ? (
-                    <Marker key={v.visitId} position={[v.latitude, v.longitude]}
-                      icon={stopIcon(v.routeOrder, v.status === 'COMPLETED')}
-                      eventHandlers={{ click: () => onVisitClick(v) }}>
-                      <Popup>
-                        <b>{v.borrowerName}</b><br />
-                        {v.address}<br />
-                        <span style={{ color: dpdColor(v.dpd) }}>DPD: {v.dpd} days</span> · {fmt(v.outstandingAmount)}
-                        {v.visitWindowStart && <><br />🕐 Available {fmtWindow(v.visitWindowStart, v.visitWindowEnd)}</>}
-                      </Popup>
-                    </Marker>
-                  ) : null)}
-                </MapContainer>
+              {/* Mobile-only toggle */}
+              <div className="toggle-tabs">
+                {['list', 'map'].map(t => (
+                  <button key={t} className={`toggle-tab${view === t ? ' active' : ''}`} onClick={() => setView(t)}>
+                    {t === 'map' ? '🗺 Map' : '☰ List'}
+                  </button>
+                ))}
               </div>
-              <div className="map-hint">Tap a pin to view details</div>
             </div>
-          )}
 
-          {view === 'list' && (
-            <div className="content">
+            {/* List — always shown in left panel; on mobile hidden when map tab active */}
+            <div className="content" style={{ display: view === 'map' ? 'none' : undefined }}>
               {visits.map(v => {
-                const window = fmtWindow(v.visitWindowStart, v.visitWindowEnd)
+                const win = fmtWindow(v.visitWindowStart, v.visitWindowEnd)
                 return (
                   <div key={v.visitId} className="card" onClick={() => onVisitClick(v)}>
                     <div className="visit-row">
@@ -370,9 +345,9 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onLogout }) {
                       <div className="visit-body">
                         <div className="visit-name">{v.borrowerName}</div>
                         <div className="visit-addr">{v.address}</div>
-                        {window && (
+                        {win && (
                           <div style={{ fontSize: 12, color: '#92400e', fontWeight: 600, marginTop: 4 }}>
-                            🕐 Available {window}
+                            🕐 Available {win}
                           </div>
                         )}
                         <div className="chips-row">
@@ -390,8 +365,35 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onLogout }) {
                 )
               })}
             </div>
-          )}
-        </>
+          </div>
+
+          {/* Right panel: map — on mobile shown only when map tab active */}
+          <div className="route-map-panel" style={{ display: view === 'list' ? 'none' : undefined }}>
+            <div className="map-wrap" style={{ height: '100%' }}>
+              <MapContainer center={homePos} zoom={13} style={{ height: '100%', width: '100%' }}>
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='© OpenStreetMap' />
+                <FitBounds points={routeLine} />
+                <Polyline positions={routeLine} color="#4f46e5" weight={3} opacity={0.65} dashArray="6,5" />
+                <Marker position={homePos} icon={homeIcon}>
+                  <Popup><b>{agent.name}</b><br />Starting point</Popup>
+                </Marker>
+                {visits.map(v => v.latitude && v.longitude ? (
+                  <Marker key={v.visitId} position={[v.latitude, v.longitude]}
+                    icon={stopIcon(v.routeOrder, v.status === 'COMPLETED')}
+                    eventHandlers={{ click: () => onVisitClick(v) }}>
+                    <Popup>
+                      <b>{v.borrowerName}</b><br />
+                      {v.address}<br />
+                      <span style={{ color: dpdColor(v.dpd) }}>DPD: {v.dpd} days</span> · {fmt(v.outstandingAmount)}
+                      {v.visitWindowStart && <><br />🕐 Available {fmtWindow(v.visitWindowStart, v.visitWindowEnd)}</>}
+                    </Popup>
+                  </Marker>
+                ) : null)}
+              </MapContainer>
+            </div>
+            <div className="map-hint">Click a pin to view details</div>
+          </div>
+        </div>
       )}
     </div>
   )

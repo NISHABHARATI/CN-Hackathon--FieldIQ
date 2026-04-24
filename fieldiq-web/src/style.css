@@ -36,8 +36,7 @@ body {
 
 /* ── App shell ────────────────────────────────────────────────── */
 .screen {
-  max-width: 430px;
-  margin: 0 auto;
+  width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -45,9 +44,23 @@ body {
   background: var(--bg);
 }
 
-@media (min-width: 430px) {
-  body { display: flex; justify-content: center; background: #e8edf5; }
-  .screen { box-shadow: var(--sh-lg); }
+/* Tablet: centered container */
+@media (min-width: 640px) {
+  body { background: #e8edf5; }
+  .screen {
+    max-width: 720px;
+    margin: 0 auto;
+    box-shadow: var(--sh-lg);
+  }
+}
+
+/* Desktop: wider container */
+@media (min-width: 1024px) {
+  .screen {
+    max-width: 1180px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
 }
 
 /* ── Top bar ──────────────────────────────────────────────────── */
@@ -59,9 +72,15 @@ body {
   border-bottom: 1px solid var(--border);
   padding: 14px 16px 12px;
 }
+@media (min-width: 640px) {
+  .topbar { padding: 16px 24px 14px; }
+}
 .topbar-row { display: flex; align-items: center; gap: 10px; }
 .topbar-title { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.2; }
 .topbar-sub   { font-size: 12px; color: var(--t2); margin-top: 2px; }
+@media (min-width: 640px) {
+  .topbar-title { font-size: 19px; }
+}
 
 .app-logo {
   width: 38px; height: 38px; flex-shrink: 0;
@@ -83,7 +102,46 @@ body {
 .back-btn:active { background: var(--border); }
 
 /* ── Content scroll area ──────────────────────────────────────── */
-.content { flex: 1; padding: 16px; overflow-y: auto; padding-bottom: 28px; }
+.content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  padding-bottom: 28px;
+}
+@media (min-width: 640px) {
+  .content { padding: 20px 24px 32px; }
+}
+@media (min-width: 1024px) {
+  .content { padding: 24px 28px 36px; }
+}
+
+/* ── Route layout: split on desktop ──────────────────────────── */
+.route-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+@media (min-width: 1024px) {
+  .route-body {
+    flex-direction: row;
+    overflow: hidden;
+  }
+  .route-list-panel {
+    width: 420px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .route-map-panel {
+    flex: 1;
+    display: flex !important; /* always visible on desktop */
+    flex-direction: column;
+    position: relative;
+  }
+}
 
 /* ── Hero banner ──────────────────────────────────────────────── */
 .hero {
@@ -109,6 +167,10 @@ body {
 .hero-greeting { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; margin-bottom: 4px; }
 .hero-title    { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
 .hero-sub      { font-size: 13px; opacity: 0.8; margin-top: 5px; line-height: 1.4; }
+@media (min-width: 640px) {
+  .hero { padding: 28px 26px; }
+  .hero-title { font-size: 26px; }
+}
 
 /* ── Section label ────────────────────────────────────────────── */
 .section-label {
@@ -129,9 +191,14 @@ body {
   transition: transform 0.12s, box-shadow 0.12s;
   -webkit-tap-highlight-color: transparent;
 }
+@media (min-width: 640px) {
+  .card { padding: 16px 20px; margin-bottom: 12px; }
+  .card:hover { box-shadow: var(--sh); transform: translateY(-1px); }
+}
 .card:active { transform: scale(0.985); box-shadow: var(--sh-sm); }
 .card.no-tap  { cursor: default; }
 .card.no-tap:active { transform: none; }
+.card.no-tap:hover  { transform: none; box-shadow: var(--sh-sm); }
 
 /* ── Agent card ───────────────────────────────────────────────── */
 .agent-row   { display: flex; align-items: center; gap: 13px; }
@@ -151,7 +218,7 @@ body {
 }
 .chevron { color: var(--t3); font-size: 20px; font-weight: 300; }
 
-/* ── Progress bar (route completion) ─────────────────────────── */
+/* ── Progress bar ─────────────────────────────────────────────── */
 .progress-wrap { margin-bottom: 14px; }
 .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
 .progress-label  { font-size: 13px; font-weight: 600; color: var(--t2); }
@@ -161,6 +228,12 @@ body {
 
 /* ── Stats row ────────────────────────────────────────────────── */
 .stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+@media (min-width: 640px) {
+  .stats-row { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 1024px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
 .stat-box  {
   background: var(--surface); border-radius: var(--r-sm);
   padding: 12px 14px;
@@ -171,8 +244,10 @@ body {
 .stat-val  { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
 .stat-lbl  { font-size: 11px; color: var(--t2); margin-top: 2px; font-weight: 500; }
 
-/* ── Toggle tabs ──────────────────────────────────────────────── */
-.toggle-tabs { display: flex; background: var(--bg); border-radius: 12px; padding: 3px; margin-bottom: 14px; }
+/* ── Toggle tabs (mobile only) ────────────────────────────────── */
+.toggle-tabs {
+  display: flex; background: var(--bg); border-radius: 12px; padding: 3px; margin-bottom: 14px;
+}
 .toggle-tab  {
   flex: 1; padding: 8px; border: none; border-radius: 10px;
   cursor: pointer; font-size: 13px; font-weight: 600;
@@ -181,6 +256,9 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 .toggle-tab.active { background: var(--surface); color: var(--p); box-shadow: var(--sh-sm); }
+@media (min-width: 1024px) {
+  .toggle-tabs { display: none; } /* hidden — both panels always visible */
+}
 
 /* ── Visit row card ───────────────────────────────────────────── */
 .visit-row   { display: flex; align-items: flex-start; gap: 12px; }
@@ -205,8 +283,21 @@ body {
 .chip-dpd      { background: #fff7ed; color: #c2410c; }
 
 /* ── Map ──────────────────────────────────────────────────────── */
-.map-wrap { height: 400px; position: relative; }
+.map-wrap {
+  height: 420px;
+  position: relative;
+}
 .map-wrap .leaflet-container { height: 100%; width: 100%; }
+@media (min-width: 1024px) {
+  .map-wrap {
+    height: 100%;
+    min-height: 500px;
+    flex: 1;
+  }
+  /* make the leaflet container fill the flex panel */
+  .route-map-panel .map-wrap { height: 100%; }
+  .route-map-panel .map-wrap .leaflet-container { position: absolute; inset: 0; }
+}
 .map-hint {
   position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
   background: rgba(15,23,42,0.72); color: #fff;
@@ -227,7 +318,7 @@ body {
   padding: 10px 0; border-bottom: 1px solid #f8fafc; font-size: 14px;
 }
 .detail-row:last-child { border-bottom: none; padding-bottom: 0; }
-.detail-lbl { color: var(--t2); font-size: 13px; font-weight: 500; }
+.detail-lbl { color: var(--t2); font-size: 13px; font-weight: 500; flex-shrink: 0; }
 .detail-val { font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
 
 /* ── Alert ────────────────────────────────────────────────────── */
@@ -250,6 +341,12 @@ body {
 
 /* ── Outcome grid ─────────────────────────────────────────────── */
 .outcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+@media (min-width: 640px) {
+  .outcome-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+  .outcome-grid { grid-template-columns: repeat(4, 1fr); }
+}
 .outcome-opt {
   padding: 12px 8px; border-radius: var(--r-sm);
   border: 2px solid var(--border); text-align: center;
@@ -260,6 +357,7 @@ body {
 }
 .outcome-opt .opt-icon { font-size: 18px; display: block; margin-bottom: 4px; }
 .outcome-opt:active    { transform: scale(0.96); }
+.outcome-opt:hover     { border-color: var(--p); background: var(--p-light); color: var(--p-dark); }
 .outcome-opt.selected  { border-color: var(--p); background: var(--p-light); color: var(--p-dark); }
 
 /* ── Form ─────────────────────────────────────────────────────── */
@@ -274,6 +372,16 @@ body {
   -webkit-appearance: none;
 }
 .form-input:focus { border-color: var(--p); box-shadow: 0 0 0 3px var(--p-glow); }
+@media (min-width: 640px) {
+  .form-input { font-size: 15px; padding: 13px 16px; }
+}
+
+/* ── Login screen: cap width on large screens ─────────────────── */
+.login-form-wrap {
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+}
 
 /* ── GPS pill ─────────────────────────────────────────────────── */
 .gps-pill { display: flex; align-items: center; gap: 8px; border-radius: var(--r-sm); padding: 10px 14px; margin-bottom: 14px; font-size: 13px; font-weight: 600; }
@@ -282,6 +390,9 @@ body {
 
 /* ── Buttons ──────────────────────────────────────────────────── */
 .btn-wrap { padding: 12px 16px 28px; display: flex; flex-direction: column; gap: 8px; }
+@media (min-width: 640px) {
+  .btn-wrap { padding: 16px 24px 32px; }
+}
 .btn {
   display: block; width: 100%; padding: 15px;
   border: none; border-radius: 14px;
@@ -292,6 +403,7 @@ body {
 }
 .btn:active   { transform: scale(0.97); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:hover:not(:disabled) { opacity: 0.88; }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--p), var(--p-dark));
@@ -324,7 +436,7 @@ body {
 .empty-wrap  { display: flex; flex-direction: column; align-items: center; padding: 52px 24px; text-align: center; }
 .empty-icon  { font-size: 52px; margin-bottom: 16px; opacity: 0.55; }
 .empty-title { font-size: 17px; font-weight: 700; margin-bottom: 7px; }
-.empty-sub   { font-size: 13px; color: var(--t2); line-height: 1.55; margin-bottom: 24px; }
+.empty-sub   { font-size: 13px; color: var(--t2); line-height: 1.55; margin-bottom: 24px; max-width: 320px; }
 
 /* ── DPD indicator ────────────────────────────────────────────── */
 .dpd-high { color: var(--danger); font-weight: 700; }
