@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: fieldiq-backend
+    runtime: docker
+    rootDir: fieldiq-backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
