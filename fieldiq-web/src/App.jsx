@@ -211,25 +211,6 @@ function LoginScreen({ onLogin }) {
           </div>
         </form>
 
-        <div className="card no-tap" style={{ marginTop: 24, background: 'var(--bg2)' }}>
-          <div className="section-title" style={{ marginBottom: 10 }}>Demo Credentials</div>
-          {[
-            ['Rajesh Kumar', '9820001111', '1111', 'South Mumbai'],
-            ['Priya Sharma',  '9820002222', '2222', 'Bandra West'],
-            ['Anil Patil',    '9820003333', '3333', 'Andheri East'],
-            ['Sunita Desai',  '9820004444', '4444', 'Thane'],
-            ['M. Shaikh',     '9820005555', '5555', 'Navi Mumbai'],
-          ].map(([name, ph, p, zone]) => (
-            <div key={ph} className="detail-row" style={{ cursor: 'pointer' }}
-              onClick={() => { setPhone(ph); setPin(p) }}>
-              <span className="detail-lbl">{name}</span>
-              <span className="detail-val" style={{ color: 'var(--t2)', fontSize: 12 }}>
-                {ph} · PIN {p} · {zone}
-              </span>
-            </div>
-          ))}
-          <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 8 }}>Tap a row to auto-fill</div>
-        </div>
       </div>
     </div>
   )
