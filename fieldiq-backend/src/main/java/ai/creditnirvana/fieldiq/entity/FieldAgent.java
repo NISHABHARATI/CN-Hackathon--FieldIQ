@@ -48,6 +48,9 @@ public class FieldAgent {
     private Integer successfulVisits = 0;
     private Integer totalAssignedVisits = 0;
 
+    private String pin;
+    private String role = "AGENT";
+
     public FieldAgent() {}
 
     public Long getId() { return id; }
@@ -104,6 +107,12 @@ public class FieldAgent {
     public Integer getTotalAssignedVisits() { return totalAssignedVisits; }
     public void setTotalAssignedVisits(Integer totalAssignedVisits) { this.totalAssignedVisits = totalAssignedVisits; }
 
+    public String getPin() { return pin; }
+    public void setPin(String pin) { this.pin = pin; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
     public static FieldAgentBuilder builder() { return new FieldAgentBuilder(); }
 
     public static class FieldAgentBuilder {
@@ -125,6 +134,8 @@ public class FieldAgent {
         private String gender;
         private Integer successfulVisits = 0;
         private Integer totalAssignedVisits = 0;
+        private String pin;
+        private String role = "AGENT";
 
         public FieldAgentBuilder id(Long id) { this.id = id; return this; }
         public FieldAgentBuilder agentCode(String agentCode) { this.agentCode = agentCode; return this; }
@@ -144,6 +155,8 @@ public class FieldAgent {
         public FieldAgentBuilder gender(String gender) { this.gender = gender; return this; }
         public FieldAgentBuilder successfulVisits(Integer v) { this.successfulVisits = v; return this; }
         public FieldAgentBuilder totalAssignedVisits(Integer v) { this.totalAssignedVisits = v; return this; }
+        public FieldAgentBuilder pin(String v) { this.pin = v; return this; }
+        public FieldAgentBuilder role(String v) { this.role = v; return this; }
 
         public FieldAgent build() {
             FieldAgent a = new FieldAgent();
@@ -157,6 +170,8 @@ public class FieldAgent {
             a.gender = gender;
             a.successfulVisits = successfulVisits;
             a.totalAssignedVisits = totalAssignedVisits;
+            a.pin = pin;
+            a.role = role;
             return a;
         }
     }

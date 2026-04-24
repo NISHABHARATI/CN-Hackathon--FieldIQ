@@ -43,7 +43,7 @@ public class DataSeeder implements CommandLineRunner {
         List<FieldAgent> agents = List.of(
 
             FieldAgent.builder()
-                .agentCode("AGT-001").name("Rajesh Kumar").phone("9820001111")
+                .agentCode("AGT-001").name("Rajesh Kumar").phone("9820001111").pin("1111")
                 .homeLatitude(18.9320).homeLongitude(72.8347)
                 .currentLatitude(18.9320).currentLongitude(72.8347)
                 .city("Mumbai").zone("South Mumbai")
@@ -55,7 +55,7 @@ public class DataSeeder implements CommandLineRunner {
                 .build(),
 
             FieldAgent.builder()
-                .agentCode("AGT-002").name("Priya Sharma").phone("9820002222")
+                .agentCode("AGT-002").name("Priya Sharma").phone("9820002222").pin("2222")
                 .homeLatitude(19.0544).homeLongitude(72.8322)
                 .currentLatitude(19.0544).currentLongitude(72.8322)
                 .city("Mumbai").zone("Bandra West")
@@ -67,7 +67,7 @@ public class DataSeeder implements CommandLineRunner {
                 .build(),
 
             FieldAgent.builder()
-                .agentCode("AGT-003").name("Anil Patil").phone("9820003333")
+                .agentCode("AGT-003").name("Anil Patil").phone("9820003333").pin("3333")
                 .homeLatitude(19.1197).homeLongitude(72.8468)
                 .currentLatitude(19.1197).currentLongitude(72.8468)
                 .city("Mumbai").zone("Andheri East")
@@ -79,7 +79,7 @@ public class DataSeeder implements CommandLineRunner {
                 .build(),
 
             FieldAgent.builder()
-                .agentCode("AGT-004").name("Sunita Desai").phone("9820004444")
+                .agentCode("AGT-004").name("Sunita Desai").phone("9820004444").pin("4444")
                 .homeLatitude(19.2183).homeLongitude(72.9781)
                 .currentLatitude(19.2183).currentLongitude(72.9781)
                 .city("Mumbai").zone("Thane")
@@ -91,7 +91,7 @@ public class DataSeeder implements CommandLineRunner {
                 .build(),
 
             FieldAgent.builder()
-                .agentCode("AGT-005").name("Mohammed Shaikh").phone("9820005555")
+                .agentCode("AGT-005").name("Mohammed Shaikh").phone("9820005555").pin("5555")
                 .homeLatitude(19.0330).homeLongitude(73.0297)
                 .currentLatitude(19.0330).currentLongitude(73.0297)
                 .city("Mumbai").zone("Navi Mumbai")

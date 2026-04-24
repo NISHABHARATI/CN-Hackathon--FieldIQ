@@ -42,10 +42,23 @@ function FitBounds({ points }) {
 const API     = 'https://satchel-cancel-abnormal.ngrok-free.dev'
 const HEADERS = { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }
 
+function authHeaders() {
+  const s = JSON.parse(localStorage.getItem('fiq_session') || '{}')
+  const h = { ...HEADERS }
+  if (s.token) h['Authorization'] = `Bearer ${s.token}`
+  return h
+}
+
 const AVATAR_BG = ['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6','#0ea5e9','#06b6d4','#ec4899']
 
 function initials(name) {
   return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+}
+
+function avatarBg(name) {
+  let h = 0
+  for (let c of name) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff
+  return AVATAR_BG[Math.abs(h) % AVATAR_BG.length]
 }
 
 function greeting() {
@@ -108,19 +121,38 @@ function Spinner({ text = 'Loading…' }) {
   )
 }
 
-// ─── Screen 1: Agent Selection ────────────────────────────────────────────────
+// ─── Screen 0: Login ──────────────────────────────────────────────────────────
 
-function AgentSelect({ onSelect }) {
-  const [agents, setAgents]   = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(false)
+function LoginScreen({ onLogin }) {
+  const [phone, setPhone]       = useState('')
+  const [pin, setPin]           = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
 
-  useEffect(() => {
-    fetch(`${API}/api/agents`, { headers: HEADERS })
-      .then(r => r.json())
-      .then(data => { setAgents(data); setLoading(false) })
-      .catch(() => { setError(true); setLoading(false) })
-  }, [])
+  const submit = async (e) => {
+    e.preventDefault()
+    if (!phone || !pin) return setError('Enter phone and PIN')
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch(`${API}/api/auth/login`, {
+        method: 'POST', headers: HEADERS,
+        body: JSON.stringify({ phone, pin }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || 'Invalid phone or PIN')
+        setLoading(false)
+        return
+      }
+      const session = await res.json()
+      localStorage.setItem('fiq_session', JSON.stringify(session))
+      onLogin(session)
+    } catch {
+      setError('Cannot reach server. Check your connection.')
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="screen">
@@ -129,7 +161,7 @@ function AgentSelect({ onSelect }) {
           <div className="app-logo">⚡</div>
           <div>
             <div className="topbar-title">FieldIQ</div>
-            <div className="topbar-sub">{todayLabel()}</div>
+            <div className="topbar-sub">Collections Intelligence</div>
           </div>
         </div>
       </div>
@@ -137,48 +169,75 @@ function AgentSelect({ onSelect }) {
       <div className="content">
         <div className="hero">
           <div className="hero-greeting">{greeting()}</div>
-          <div className="hero-title">Who's on field today?</div>
-          <div className="hero-sub">Select your profile to load today's route and visit assignments.</div>
+          <div className="hero-title">Sign in to start your day</div>
+          <div className="hero-sub">{todayLabel()}</div>
         </div>
 
-        {loading && <Spinner text="Loading agents…" />}
-
-        {error && (
-          <div className="alert alert-danger">
-            ⚠️ Could not connect to server. Make sure the backend is running.
+        <form onSubmit={submit}>
+          <div className="form-group">
+            <label className="form-label">Mobile Number</label>
+            <input
+              className="form-input"
+              type="tel"
+              placeholder="e.g. 9820001111"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              autoComplete="tel"
+            />
           </div>
-        )}
+          <div className="form-group">
+            <label className="form-label">PIN</label>
+            <input
+              className="form-input"
+              type="password"
+              placeholder="4-digit PIN"
+              maxLength={4}
+              value={pin}
+              onChange={e => setPin(e.target.value)}
+              autoComplete="current-password"
+            />
+          </div>
 
-        {!loading && !error && agents.length > 0 && (
-          <>
-            <div className="section-label">Field Agents</div>
-            {agents.map((agent, i) => (
-              <div key={agent.id} className="card" onClick={() => onSelect(agent)}>
-                <div className="agent-row">
-                  <div className="agent-avatar" style={{ background: AVATAR_BG[i % AVATAR_BG.length] }}>
-                    {initials(agent.name)}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="agent-name">{agent.name}</div>
-                    <div className="agent-meta">{agent.agentCode} · {agent.phone}</div>
-                  </div>
-                  <div className="agent-right">
-                    <div className="zone-pill">{agent.zone}</div>
-                    <div className="chevron">›</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </>
-        )}
+          {error && (
+            <div className="alert alert-danger" style={{ marginBottom: 16 }}>
+              ⚠️ {error}
+            </div>
+          )}
+
+          <div className="btn-wrap" style={{ padding: 0 }}>
+            <button className="btn btn-primary" type="submit" disabled={loading}>
+              {loading ? 'Signing in…' : '→ Sign In'}
+            </button>
+          </div>
+        </form>
+
+        <div className="card no-tap" style={{ marginTop: 24, background: 'var(--bg2)' }}>
+          <div className="section-title" style={{ marginBottom: 10 }}>Demo Credentials</div>
+          {[
+            ['Rajesh Kumar', '9820001111', '1111', 'South Mumbai'],
+            ['Priya Sharma',  '9820002222', '2222', 'Bandra West'],
+            ['Anil Patil',    '9820003333', '3333', 'Andheri East'],
+            ['Sunita Desai',  '9820004444', '4444', 'Thane'],
+            ['M. Shaikh',     '9820005555', '5555', 'Navi Mumbai'],
+          ].map(([name, ph, p, zone]) => (
+            <div key={ph} className="detail-row" style={{ cursor: 'pointer' }}
+              onClick={() => { setPhone(ph); setPin(p) }}>
+              <span className="detail-lbl">{name}</span>
+              <span className="detail-val" style={{ color: 'var(--t2)', fontSize: 12 }}>
+                {ph} · PIN {p} · {zone}
+              </span>
+            </div>
+          ))}
+          <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 8 }}>Tap a row to auto-fill</div>
+        </div>
       </div>
     </div>
   )
 }
 
-// ─── Screen 2: Today's Route ──────────────────────────────────────────────────
+// ─── Screen 1: Today's Route ──────────────────────────────────────────────────
 
-function RouteList({ agent, preloadedVisits, onVisitClick, onBack }) {
+function RouteList({ agent, preloadedVisits, onVisitClick, onLogout }) {
   const [visits, setVisits]   = useState(preloadedVisits ?? [])
   const [loading, setLoading] = useState(preloadedVisits === null)
   const [generating, setGen]  = useState(false)
@@ -187,7 +246,7 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onBack }) {
 
   const load = () => {
     setLoading(true)
-    fetch(`${API}/api/routes/agent/${agent.id}?date=${today}`, { headers: HEADERS })
+    fetch(`${API}/api/routes/agent/${agent.agentId}?date=${today}`, { headers: authHeaders() })
       .then(r => r.json())
       .then(data => { setVisits(Array.isArray(data) ? data : []); setLoading(false) })
       .catch(() => setLoading(false))
@@ -196,7 +255,7 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onBack }) {
   const generateRoutes = () => {
     setGen(true)
     fetch(`${API}/api/routes/generate`, {
-      method: 'POST', headers: HEADERS,
+      method: 'POST', headers: authHeaders(),
       body: JSON.stringify({ date: today }),
     })
       .then(r => r.json())
@@ -207,25 +266,28 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onBack }) {
   useEffect(() => {
     if (preloadedVisits !== null) { setVisits(preloadedVisits); setLoading(false) }
     else load()
-  }, [agent.id])
+  }, [agent.agentId])
 
   const done  = visits.filter(v => v.status === 'COMPLETED').length
   const total = visits.length
   const pct   = total > 0 ? Math.round((done / total) * 100) : 0
   const totalDist = visits.reduce((s, v) => s + (v.distanceFromPrevious || 0), 0).toFixed(1)
 
-  const homePos  = [agent.homeLatitude, agent.homeLongitude]
+  const homePos  = [agent.homeLatitude ?? 18.98, agent.homeLongitude ?? 72.83]
   const routeLine = [homePos, ...visits.map(v => [v.latitude, v.longitude])].filter(p => p[0] && p[1])
 
   return (
     <div className="screen">
       <div className="topbar">
         <div className="topbar-row">
-          <button className="back-btn" onClick={onBack}>‹</button>
-          <div style={{ flex: 1 }}>
+          <div className="agent-avatar" style={{ background: avatarBg(agent.name), width: 36, height: 36, fontSize: 13, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, flexShrink: 0 }}>
+            {initials(agent.name)}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div className="topbar-title">{agent.name}</div>
             <div className="topbar-sub">{agent.zone} · {todayLabel()}</div>
           </div>
+          <button className="btn-ghost-sm" onClick={onLogout} title="Sign out" style={{ flexShrink: 0, background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--t2)', fontSize: 20, padding: '4px 8px' }}>⏏</button>
         </div>
       </div>
 
@@ -247,7 +309,6 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onBack }) {
       {!loading && total > 0 && (
         <>
           <div className="content" style={{ paddingBottom: 0 }}>
-            {/* Progress */}
             <div className="progress-wrap">
               <div className="progress-header">
                 <span className="progress-label">Today's progress</span>
@@ -258,7 +319,6 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onBack }) {
               </div>
             </div>
 
-            {/* Stats */}
             <div className="stats-row">
               <div className="stat-box">
                 <span className="stat-icon">📍</span>
@@ -356,7 +416,7 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onBack }) {
   )
 }
 
-// ─── Screen 3: Visit Detail ───────────────────────────────────────────────────
+// ─── Screen 2: Visit Detail ───────────────────────────────────────────────────
 
 function VisitDetail({ visit: init, agent, onBack, onOutcome, onRouteUpdated }) {
   const [visit, setVisit]         = useState(init)
@@ -368,16 +428,16 @@ function VisitDetail({ visit: init, agent, onBack, onOutcome, onRouteUpdated }) 
 
   const startVisit = async () => {
     setStarting(true)
-    const res = await fetch(`${API}/api/visits/${visit.visitId}/start`, { method: 'PUT', headers: HEADERS })
+    const res = await fetch(`${API}/api/visits/${visit.visitId}/start`, { method: 'PUT', headers: authHeaders() })
     if (res.ok) setVisit(await res.json())
     setStarting(false)
   }
 
   const callReoptimise = async (lat, lng) => {
     const res = await fetch(`${API}/api/routes/reoptimise`, {
-      method: 'PUT', headers: HEADERS,
+      method: 'PUT', headers: authHeaders(),
       body: JSON.stringify({
-        agentId: agent.id, date: new Date().toISOString().split('T')[0],
+        agentId: agent.agentId, date: new Date().toISOString().split('T')[0],
         deferVisitId: visit.visitId, currentLat: lat, currentLng: lng,
         visitWindowStart: winStart || null, visitWindowEnd: winEnd || null,
       }),
@@ -391,7 +451,7 @@ function VisitDetail({ visit: init, agent, onBack, onOutcome, onRouteUpdated }) 
     setDeferring(true)
     navigator.geolocation.getCurrentPosition(
       p => callReoptimise(p.coords.latitude, p.coords.longitude),
-      () => callReoptimise(agent.homeLatitude, agent.homeLongitude),
+      () => callReoptimise(agent.homeLatitude ?? 18.98, agent.homeLongitude ?? 72.83),
       { timeout: 8000 }
     )
   }
@@ -533,7 +593,7 @@ function VisitDetail({ visit: init, agent, onBack, onOutcome, onRouteUpdated }) 
   )
 }
 
-// ─── Screen 4: Log Outcome ────────────────────────────────────────────────────
+// ─── Screen 3: Log Outcome ────────────────────────────────────────────────────
 
 function LogOutcome({ visit, onBack, onDone }) {
   const [outcome, setOutcome]       = useState('')
@@ -557,7 +617,7 @@ function LogOutcome({ visit, onBack, onDone }) {
     if (!outcome) return alert('Please select an outcome')
     setSubmitting(true)
     const res = await fetch(`${API}/api/visits/${visit.visitId}/outcome`, {
-      method: 'POST', headers: HEADERS,
+      method: 'POST', headers: authHeaders(),
       body: JSON.stringify({
         outcome,
         notes:           notes || null,
@@ -656,17 +716,38 @@ function LogOutcome({ visit, onBack, onDone }) {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [screen, setScreen] = useState('agents')
+  const [screen, setScreen] = useState('login')
   const [agent, setAgent]   = useState(null)
   const [visit, setVisit]   = useState(null)
   const [visits, setVisits] = useState(null)
 
-  if (screen === 'agents')
-    return <AgentSelect onSelect={a => { setAgent(a); setVisits(null); setScreen('route') }} />
+  useEffect(() => {
+    const raw = localStorage.getItem('fiq_session')
+    if (raw) {
+      try {
+        const session = JSON.parse(raw)
+        if (session.token && session.agentId) {
+          setAgent(session)
+          setScreen('route')
+        }
+      } catch { /* stale */ }
+    }
+  }, [])
+
+  const logout = () => {
+    localStorage.removeItem('fiq_session')
+    setAgent(null)
+    setVisits(null)
+    setVisit(null)
+    setScreen('login')
+  }
+
+  if (screen === 'login')
+    return <LoginScreen onLogin={s => { setAgent(s); setVisits(null); setScreen('route') }} />
 
   if (screen === 'route')
     return <RouteList agent={agent} preloadedVisits={visits}
-      onBack={() => setScreen('agents')}
+      onLogout={logout}
       onVisitClick={v => { setVisit(v); setScreen('detail') }} />
 
   if (screen === 'detail')
