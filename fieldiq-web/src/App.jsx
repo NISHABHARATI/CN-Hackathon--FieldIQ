@@ -291,7 +291,7 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onLogout }) {
         <div className="route-body">
           {/* Left panel: stats + list */}
           <div className="route-list-panel">
-            <div className="content" style={{ paddingBottom: 0 }}>
+            <div className="content" style={{ paddingBottom: 4 }}>
               <div className="progress-wrap">
                 <div className="progress-header">
                   <span className="progress-label">Today's progress</span>
@@ -330,7 +330,7 @@ function RouteList({ agent, preloadedVisits, onVisitClick, onLogout }) {
             </div>
 
             {/* List — always shown in left panel; on mobile hidden when map tab active */}
-            <div className="content" style={{ display: view === 'map' ? 'none' : undefined }}>
+            <div className="content" style={{ display: view === 'map' ? 'none' : undefined, paddingTop: 0 }}>
               {visits.map(v => {
                 const win = fmtWindow(v.visitWindowStart, v.visitWindowEnd)
                 return (
