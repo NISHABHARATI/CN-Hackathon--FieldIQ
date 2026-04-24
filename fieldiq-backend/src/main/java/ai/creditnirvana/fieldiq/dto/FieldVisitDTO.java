@@ -2,6 +2,7 @@ package ai.creditnirvana.fieldiq.dto;
 
 import ai.creditnirvana.fieldiq.enums.VisitStatus;
 import ai.creditnirvana.fieldiq.enums.VisitTrigger;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +19,9 @@ public class FieldVisitDTO {
     private Double distanceFromPrevious;
     private Double estimatedTravelMinutes;
     private Double agentMatchScore;
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime visitWindowStart;
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime visitWindowEnd;
 
     private Long accountId;
